@@ -1,0 +1,434 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage{amsmath, amssymb}
+\usepackage{geometry}
+\usepackage{tabularx}
+\usepackage[lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage{enumerate}
+\usepackage{color}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{rotating}
+\usepackage{graphicx} % Dùng để chèn ảnh
+\usepackage{float}    % Dùng để ép vị trí ảnh bằng [H]
+\usepackage{xcolor}   % Dùng để tô màu code
+% The package belong to this particular document.
+\usepackage{xcolor}
+\usepackage{listings}
+\definecolor{mGreen}{rgb}{0,0.7,0}
+\definecolor{mGray}{rgb}{0.5,0.5,0.5}
+\definecolor{mPurple}{rgb}{0.5,0,0.35} % Adjusted to a purple shade
+\definecolor{backgroundColour}{rgb}{0.97,0.97,0.97} % Adjusted to a lighter shade
+
+% Cấu hình form màu sắc cho Code R chuẩn đẹp
+\lstdefinestyle{RStyle}{
+    backgroundcolor=\color{backgroundColour},   % Set background color
+    commentstyle=\color{mGreen},                 % Comments color
+    keywordstyle=\color{blue},                   % Keywords color
+    numberstyle=\tiny\color{mGray},              % Line numbers style
+    stringstyle=\color{mPurple},                 % Strings color
+    basicstyle=\footnotesize\ttfamily,           % Basic font style
+    breakatwhitespace=false,                     % Break at whitespace
+    breaklines=true,                             % Break long lines
+    captionpos=b,                               % Position of the caption
+    keepspaces=true,                             % Keep spaces
+    numbers=left,                               % Show line numbers
+    numbersep=5pt,                              % Space between numbers and code
+    showspaces=false,                           % Don't show spaces
+    showstringspaces=false,                     % Don't show string spaces
+    showtabs=false,                             % Don't show tabs
+    tabsize=2,                                  % Tab size
+    language=R                                  % Set language to R
+}
+
+% ĐÂY LÀ GÓI BẠN BỊ THIẾU ĐỂ DÙNG ĐƯỢC [H]
+\usepackage{float} 
+
+\geometry{a4paper, margin=2cm}
+
+\begin{document}
+
+\section{Kiến thức nền}
+\subsection{Cơ sở lý thuyết thống kê}
+
+Trước khi tiến hành trực quan hóa và phân tích tập dữ liệu, nghiên cứu này áp dụng các khái niệm và đại lượng thống kê mô tả cốt lõi nhằm làm rõ đặc tính của các biến số. Các cơ sở toán học được sử dụng bao gồm:
+
+\subsubsection{Các đại lượng đo lường xu hướng tập trung}
+\begin{itemize}
+    \item \textbf{Trung bình mẫu (Sample Mean - $\bar{x}$):} Là giá trị trung bình cộng của tất cả các quan sát trong mẫu, thể hiện trọng tâm của dữ liệu nhưng dễ bị ảnh hưởng bởi các giá trị cực đoan.
+    $$ \bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i $$
+    \item \textbf{Trung vị (Median - $Q_2$):} Là giá trị nằm ở vị trí chính giữa của tập dữ liệu sau khi đã được sắp xếp có thứ tự. Trung vị chia tập dữ liệu thành hai phần bằng nhau (50\% lớn hơn và 50\% nhỏ hơn) và không bị nhiễu bởi các điểm dị biệt.
+    \item \textbf{Yếu vị (Mode):} Là giá trị hoặc dải giá trị có tần suất xuất hiện cao nhất trong tập dữ liệu (tương ứng với đỉnh cao nhất trên biểu đồ phân phối).
+\end{itemize}
+
+\subsubsection{Các đại lượng đo lường độ phân tán}
+\begin{itemize}
+    \item \textbf{Phương sai mẫu (Sample Variance - $s^2$):} Đo lường mức độ biến động bình phương trung bình của các quan sát xung quanh giá trị trung bình mẫu.
+    $$ s^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2 $$
+    \item \textbf{Độ lệch chuẩn mẫu (Sample Standard Deviation - $s$):} Là căn bậc hai của phương sai mẫu, mang cùng đơn vị đo lường với biến gốc, biểu thị mức độ phân tán thực tế của dữ liệu.
+    \item \textbf{Tứ phân vị (Quartiles) và Khoảng tứ phân vị (IQR):} Tứ phân vị chia tập dữ liệu thành 4 phần bằng nhau, bao gồm $Q_1$ (Phân vị 25), $Q_2$ (Phân vị 50) và $Q_3$ (Phân vị 75). Khoảng tứ phân vị đo lường sự phân tán của 50\% dữ liệu nằm ở trung tâm:
+    $$ IQR = Q_3 - Q_1 $$
+\end{itemize}
+
+\subsubsection{Trực quan hóa hình dáng phân phối và Điểm dị biệt}
+\begin{itemize}
+    \item \textbf{Biểu đồ phân phối tần suất (Histogram):} Chia phạm vi dữ liệu thành các khoảng (bins) liên tiếp và đếm tần suất xuất hiện nhằm đánh giá hình dáng phân phối. Nếu đồ thị có phần đuôi dài kéo về bên phải và thỏa mãn bất đẳng thức $Mode < Median < Mean$, dữ liệu được kết luận là lệch phải (Right-skewed).
+    \item \textbf{Biểu đồ hộp (Boxplot) và ranh giới điểm dị biệt (Outliers):} Boxplot là đồ thị tóm tắt dữ liệu dựa trên 5 đại lượng (Min, $Q_1$, $Q_2$, $Q_3$, Max). Các điểm dữ liệu được xác định là điểm dị biệt (Outliers) và được biểu diễn bằng các chấm độc lập nếu chúng nằm ngoài ranh giới toán học:
+    $$ [Q_1 - 1.5 \times IQR, \quad Q_3 + 1.5 \times IQR] $$
+\end{itemize}
+
+\subsubsection{Đo lường mối quan hệ song biến}
+\begin{itemize}
+    \item \textbf{Hệ số tương quan tuyến tính Pearson ($r$):} Sử dụng kết hợp với biểu đồ phân tán (Scatter Plot) để lượng hóa mức độ và chiều hướng của mối quan hệ tuyến tính giữa hai biến định lượng. Giá trị $r$ nằm trong đoạn $[-1, 1]$.
+    $$ r = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^{n} (x_i - \bar{x})^2 \sum_{i=1}^{n} (y_i - \bar{y})^2}} $$
+\end{itemize}
+
+\section{Thống kê mô tả} 
+Thông qua việc sử dụng các đại lượng thống kê cơ bản kết hợp với các biểu đồ trực quan, ta không chỉ nắm bắt được quy luật phân phối, xu hướng tập 
+trung và độ phân tán của dữ liệu, mà còn thể hiện được mối quan hệ tương quan giữa các biến số. Đây là bước đệm quan trọng trước khi tiến hành các 
+mô hình kiểm định và suy diễn phức tạp ở phần sau.
+
+\subsection{Phân loại các biến nghiên cứu}
+Trước khi tiến hành phân tích, ta phân loại các biến đã được nhóm lựa chọn ở phần trước như sau (xem Bảng \ref{tab:phan_loai_bien}):
+
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.4} 
+    \begin{tabular}{|p{4.5cm}|p{5cm}|p{5.5cm}|}
+        \hline
+        \textbf{Tên biến} & \textbf{Kiểu dữ liệu} & \textbf{Ý nghĩa} \\
+        \hline
+        \texttt{Price\_USD} & Biến định lượng liên tục & Giá bán lẻ đề xuất của CPU (USD). \\
+        \hline
+        \texttt{nb\_of\_Cores} & Biến định lượng rời rạc & Số lượng lõi xử lý vật lý của CPU. \\
+        \hline
+        \texttt{Turbo\_Frequency\_GHz} & Biến định lượng liên tục & Xung nhịp tối đa đạt được (GHz). \\
+        \hline
+        \texttt{Launch\_Year} & Biến định lượng rời rạc & Năm CPU được ra mắt thị trường. \\
+        \hline
+        \texttt{Vertical\_Segment} & Biến định tính danh nghĩa & Phân khúc (Desktop, Mobile, Server,...). \\
+        \hline
+        \texttt{TDP\_W} & Biến định lượng liên tục & Công suất tỏa nhiệt thiết kế (Watt). \\
+        \hline
+    \end{tabular}
+    \caption{Phân loại và ý nghĩa các biến nghiên cứu}
+    \label{tab:phan_loai_bien}
+\end{table}
+
+\subsection{Phân tích phân phối dữ liệu với Histogram}
+Biểu đồ Histogram được ứng dụng để đánh giá hình dáng phân phối của các biến định lượng liên tục, cụ thể là Giá bán (Price\_USD) và Công suất tỏa 
+nhiệt (TDP\_W). Riêng đối với biến Price\_USD, các giá trị khuyết được tạm thời loại trừ cục bộ nhằm đảm bảo tính chính xác của 
+biểu đồ phân phối.
+
+\subsubsection{Histogram cho biến Price\_USD}
+Vẽ Histogram cho biến Price\_USD
+\begin{lstlisting}[style=Rstyle]
+library(dplyr)
+library(ggplot2)
+library(corrplot)
+library(tidyr)
+library(patchwork)
+
+df <- read.csv("Cleaned_Intel_CPUs.csv", stringsAsFactors = FALSE)
+price_mean <- mean(df$Price_USD, na.rm = TRUE)
+price_var <- var(df$Price_USD, na.rm = TRUE)
+
+p_hist_price <- ggplot(df %>% filter(!is.na(Price_USD)), aes(x = Price_USD)) +
+  geom_histogram(fill = "steelblue", color = "black", bins = 30, alpha = 0.8) +
+  geom_vline(xintercept = price_mean, color = "red", linetype = "dashed", linewidth = 1.2) +
+  theme_minimal() +
+  labs(title = "Distribution of CPU Prices (Price_USD)",
+       subtitle = "Red dashed line represents the Mean",
+       x = "Price (USD)", y = "Frequency")
+\end{lstlisting}
+
+% --- CHÈN ẢNH HISTOGRAM PRICE ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{Histogram_Price.png}
+    \caption{Biểu đồ phân phối Histogram của Giá bán CPU (Price\_USD)}
+    \label{fig:hist_price}
+\end{figure}
+
+\subsubsection*{Nhận xét phân phối của \textit{Price\_USD}}
+Biểu đồ trên cho thấy phân phối của \textit{Price\_USD} như sau: 
+\begin{itemize}
+    \item \textbf{Lệch phải:} Phần lớn giá trị tập trung trong khoảng từ \$9.62 đến dưới \$1,000, trong khi một số ít CPU có mức giá cực kỳ cao 
+    (kéo dài tới hơn \$13,000) tạo thành một đuôi phân phối trải dài về bên phải. Điều này phản ánh sự chênh lệch rõ rệt giữa các bộ vi xử lý phổ 
+    thông dành cho người dùng cá nhân (Desktop/Mobile) và các dòng chip chuyên dụng cấp doanh nghiệp (Server). Vì phân phối lệch phải rất mạnh, dữ 
+    liệu về giá không tuân theo quy luật phân phối chuẩn.
+    \item \textbf{Mật độ tập trung cao ở vùng giá thấp:} Cột đầu tiên (sát mốc 0) và các cột liền kề trong histogram chứa tần suất quan sát cao 
+    nhất. Điều này cho thấy đa số các CPU trên thị trường có mức giá thuộc phân khúc rẻ hoặc trung bình.
+    \item \textbf{Dự đoán phân phối:} Biến Price\_USD không tuân theo phân phối chuẩn do sự lệch phải rõ rệt.
+\end{itemize}
+
+\subsubsection{Histogram cho biến TDP\_W}
+Vẽ Histogram cho biến TDP\_W.
+\begin{lstlisting}[style=Rstyle]
+tdp_mean <- mean(df$TDP_W, na.rm = TRUE)
+tdp_var <- var(df$TDP_W, na.rm = TRUE)
+cat("TDP - Mean:", tdp_mean, "| Variance:", tdp_var, "\n")
+
+p_hist_tdp <- ggplot(df, aes(x = TDP_W)) +
+  geom_histogram(fill = "coral", color = "black", bins = 30, alpha = 0.8) +
+  geom_vline(xintercept = tdp_mean, color = "red", linetype = "dashed", size = 1.2) +
+  theme_minimal() +
+  labs(title = "Distribution of Thermal Design Power (TDP_W)",
+       subtitle = "Red dashed line represents the Mean",
+       x = "TDP (Watts)", y = "Frequency")
+\end{lstlisting}
+
+% --- CHÈN ẢNH HISTOGRAM TDP ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{Histogram_TDP.png}
+    \caption{Biểu đồ phân phối Histogram của Công suất tỏa nhiệt thiết kế (TDP\_W)}
+    \label{fig:hist_tdp}
+\end{figure}
+
+\subsubsection*{Nhận xét phân phối của \textit{TDP\_W}}
+Biểu đồ trên cho thấy phân phối của \textit{TDP\_W} như sau: 
+\begin{itemize}
+    \item \textbf{Lệch phải:} Phân phối của dữ liệu không đối xứng. Phần lớn các giá trị tập trung dày đặc ở dải công suất thấp và trung bình 
+    (khu vực từ 15W đến 65W), hình thành đỉnh tần suất cao nhất của đồ thị.
+    \item \textbf{Đuôi phân phối kéo dài:} ặc dù đa số CPU tiết kiệm điện, đồ thị vẫn xuất hiện một dải dữ liệu kéo dài về phía tay phải với các 
+    giá trị đạt mức 200W đến trên 250W. Sự phân hóa này phản ánh cấu trúc thực tế của tập dữ liệu: dải công suất thấp thuộc về các vi xử lý di 
+    động (Mobile) và phổ thông (Desktop), trong khi dải công suất khổng lồ đại diện cho dòng vi xử lý máy chủ (Server) hoặc hiệu năng cao (HEDT)
+    \item \textbf{Dự đoán phân phối:} Tương tự như biến Price\_USD, sự xuất hiện của nhóm CPU có công suất tiêu thụ cực đoan đã kéo giá trị Trung 
+    bình (đường đứt nét màu đỏ) dịch chuyển sang phải, tách rời khỏi nhóm giá trị có tần suất xuất hiện cao nhất. Do đó, TDP\_W không tuân theo 
+    phân phối chuẩn.
+\end{itemize}
+
+\subsection{Phân tích sự phân tán và điểm dị biệt với Boxplot}
+Biểu đồ hộp (Boxplot) được sử dụng nhằm đối chiếu sự biến động giá (\texttt{Price\_USD}) giữa các phân khúc phần cứng khác nhau 
+(\texttt{Vertical\_Segment}). Dưới đây là đoạn mã nguồn R được sử dụng để lọc dữ liệu và trực quan hóa biểu đồ Boxplot:
+
+\begin{lstlisting}[style=Rstyle]
+df_boxplot <- df %>% 
+  filter(!is.na(Price_USD) & !is.na(Vertical_Segment) & Vertical_Segment != "")
+
+p_box <- ggplot(df_boxplot, aes(x = Vertical_Segment, y = Price_USD, fill = Vertical_Segment)) +
+  geom_boxplot(alpha = 0.7, outlier.color = "red", outlier.shape = 16, outlier.size = 2.5) +
+  theme_minimal() +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(size = 11, face = "bold")) +
+  labs(title = "Price Distribution by Vertical Segment",
+       subtitle = "Red dots represent Outliers",
+       x = "Vertical Segment", y = "Price (USD)")
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{Boxplot_Segment.png}
+    \caption{Biểu đồ Boxplot so sánh sự phân tán giá bán theo phân khúc phần cứng}
+    \label{fig:boxplot_seg}
+\end{figure}
+
+\subsubsection*{Nhận xét phân tán và điểm dị biệt:}
+Dựa vào quan sát trên biểu đồ Boxplot (Hình \ref{fig:boxplot_seg}), ta có thể rút ra những đánh giá quan trọng về sự phân hóa giá bán giữa 
+các loại CPU theo mục đích sử dụng:
+
+\begin{itemize}
+    \item \textbf{Độ phân tán của phân khúc Server (Máy chủ):} Đây là nhóm ghi nhận mức độ biến động giá lớn nhất trong toàn bộ tập dữ liệu 
+    (thể hiện qua độ rộng của thân hộp IQR) và mức giá trung vị ($Q_2$) cao nhất. Đặc biệt, nhóm này chứa điểm dị biệt có giá trị tuyệt đối 
+    cao nhất toàn bảng (vượt mốc \$10,000), phản ánh đúng tính chất đắt đỏ của các hệ thống vi xử lý dành cho trung tâm dữ liệu siêu máy tính.
+    \item \textbf{Sự tập trung của phân khúc phổ thông (Desktop và Mobile):} Hai phân khúc này có mức giá trung vị khá thấp và thân hộp hẹp, chứng 
+    tỏ phần lớn vi xử lý tiêu dùng đều duy trì ở mức giá bình ổn, dễ tiếp cận. Tuy nhiên, cả hai đều xuất hiện dải điểm dị biệt (chấm đỏ) vươn lên 
+    mốc \$3,000 - \$4,000. Về mặt thực tiễn, đây là các dòng chip đặc biệt cao cấp (như High-End Desktop - HEDT cho Desktop, hoặc máy trạm Workstation cho Mobile) hướng tới người dùng đam mê hiệu năng.
+    \item \textbf{Phân khúc Embedded (Nhúng):} Mặc dù phần lớn vi xử lý nhúng có giá thành rất rẻ (thân hộp nằm bám sát đáy đồ thị), phân khúc này 
+    lại ghi nhận một dải điểm dị biệt kéo dài ấn tượng lên tới gần mức \$4,000. Điều này không phải là lỗi dữ liệu, mà đại diện cho các dòng chip 
+    nhúng công nghiệp chuyên dụng (dành cho thiết bị y tế, hàng không, viễn thông) với yêu cầu khắt khe về độ bền và tính năng đặc thù, khiến giá 
+    bán lẻ vượt trội so với dòng nhúng dân dụng thông thường.
+\end{itemize}
+
+\section{Thống kê tóm tắt các đặc trưng còn lại}
+
+Trong nghiên cứu các hệ thống vi xử lý, việc nắm bắt các thông số cấu hình cốt lõi không chỉ giúp định danh sản phẩm mà còn là tiền đề quan trọng để giải thích các biến động về giá thành và phân khúc thị trường. Để duy trì tính súc tích và tập trung của báo cáo, thay vì triển khai trực quan hóa đơn lẻ cho từng biến, nghiên cứu tiến hành tổng hợp các chỉ số thống kê mô tả cho năm biến số định lượng kỹ thuật bao gồm: số nhân vật lý (nb\_of\_Cores), xung nhịp tối đa (Turbo\_Frequency\_GHz), dung lượng bộ nhớ đệm (Cache\_MB), khả năng hỗ trợ bộ nhớ RAM (Max\_Memory\_GB) và lịch sử phát hành (Launch\_Year).
+
+Các đại lượng thống kê cơ bản được tổng hợp tại Bảng \ref{tab:summary_stats}, cung cấp cái nhìn tổng thể về xu hướng tập trung, độ phân tán và hiện trạng dữ liệu khuyết thiếu của tập mẫu.
+
+\begin{table}[H]
+    \centering
+    \caption{Thống kê tóm tắt năm biến độc lập còn lại.}
+    \label{tab:summary_stats}
+    \begin{tabular}{|l|r|r|r|r|r|}
+        \hline
+        \textbf{Biến} & \textbf{Min} & \textbf{Trung vị} & \textbf{Trung bình} & \textbf{Max} & \textbf{NA} \\
+        \hline
+        nb\_of\_Cores & 1.0 & 4.0 & 6.27 & 72.0 & 0 \\
+        Turbo\_Frequency\_GHz & 1.2 & 3.5 & 3.42 & 5.6 & 0 \\
+        Cache\_MB & 1.0 & 8.0 & 13.06 & 112.0 & 0 \\
+        Max\_Memory\_GB & 2.0 & 64.0 & 267.80 & 4096.0 & 857 \\
+        Launch\_Year & 2012 & 2017 & 2017.30 & 2023 & 392 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Dựa trên kết quả thực nghiệm tại Bảng \ref{tab:summary_stats}, các nhận định chuyên sâu về đặc tính kỹ thuật được rút ra như sau:
+\begin{itemize}
+    \item \textbf{Cấu trúc nhân vật lý (nb\_of\_Cores):} Chỉ số trung vị đạt mức 4.0 nhân, phản ánh tiêu chuẩn phổ biến của các dòng vi xử lý dành cho người dùng cá nhân (Desktop/Mobile) trong thập kỷ qua. Tuy nhiên, giá trị trung bình (6.27) cao hơn trung vị cho thấy sự hiện diện của các quan sát ngoại lai ở phía bên phải phân phối. Đặc biệt, giá trị cực đại lên tới 72.0 nhân minh chứng cho sự phân hóa rõ rệt giữa dòng chip tiêu dùng và các giải pháp siêu máy chủ (Enterprise Server), nơi khả năng xử lý song song đa luồng được ưu tiên tuyệt đối.
+    \item \textbf{Xung nhịp tối đa (Turbo\_Frequency\_GHz):} Khác với các biến số khác, xung nhịp cho thấy tính ổn định cao với giá trị trung bình (3.42) và trung vị (3.5) xấp xỉ nhau. Điều này ngụ ý một phân phối có tính đối xứng tương đối, phản ánh giới hạn vật lý và công nghệ của vật liệu bán dẫn silicon trong việc duy trì tốc độ đồng hồ mà vẫn đảm bảo tính ổn định về nhiệt năng. Khoảng biến thiên từ 1.2 GHz đến 5.6 GHz đại diện cho toàn bộ dải sản phẩm từ tiết kiệm điện năng đến hiệu năng cực cao.   
+    \item \textbf{Kiến trúc bộ nhớ đệm (Cache\_MB):} Với biên độ dao động từ 1.0 MB đến 112.0 MB, bộ nhớ đệm thể hiện vai trò là một trong những yếu tố phân tầng hiệu năng mạnh mẽ nhất. Giá trị trung vị 8.0 MB cho thấy đa số sản phẩm tập trung ở phân khúc trung cấp, trong khi các giá trị cực đại thuộc về các kiến trúc Xeon hoặc Core-i9 với hệ thống đệm đa tầng phức tạp.
+    \item \textbf{Khả năng hỗ trợ bộ nhớ RAM (Max\_Memory\_GB):} Đây là biến số có độ phân tán lớn nhất. Mặc dù mức 64.0 GB là phổ biến cho các máy trạm cá nhân, giá trị cực đại lên tới 4096.0 GB (4 TB) cho thấy năng lực mở rộng khổng lồ của các dòng chip Server. Đáng lưu ý, số lượng dữ liệu khuyết thiếu lên đến 857 mẫu (chiếm tỷ trọng lớn nhất trong bảng) đòi hỏi các kỹ thuật xử lý dữ liệu hoặc mô hình hóa phù hợp để tránh làm sai lệch kết quả suy diễn ở các chương sau.
+    \item \textbf{Chu kỳ phát hành (Launch\_Year):} Tập dữ liệu bao quát một giai đoạn phát triển công nghệ sôi động từ 2012 đến 2023. Với trung vị 2017, mẫu nghiên cứu tập trung nhiều vào các thế hệ vi xử lý hiện đại, cho phép các phân tích sau này có giá trị cập nhật cao đối với thực tiễn thị trường công nghệ hiện nay.
+\end{itemize}
+
+\subsection{Khảo sát tương quan bằng đồ thị phân tán}
+
+Để đánh giá sơ bộ mức độ tác động và hình dáng mối quan hệ giữa biến phụ thuộc và các thông số kỹ thuật cốt lõi, nghiên cứu tiến hành xây dựng lưới đồ thị phân tán. 
+
+Đặc biệt, do phân phối gốc của biến giá (\texttt{Price\_USD}) bị lệch phải nghiêm trọng với nhiều ngoại lệ giá trị cực cao, việc trực quan hóa trên trục tọa độ tuyến tính sẽ làm mờ đi các xu hướng ở phân khúc phổ thông. Do đó, nghiên cứu quyết định áp dụng phép biến đổi Logarit cơ số 10 lên trục tung của toàn bộ các đồ thị phân tán nhằm "giãn" các điểm dữ liệu tụ tập ở mức giá thấp, giúp việc nhận diện xu hướng tuyến tính trở nên rõ ràng và chính xác hơn.
+
+\begin{lstlisting}[style=Rstyle, escapeinside={(*}{*)}]
+scatter_info <- data.frame(
+  Variable = c("nb_of_Cores", "Turbo_Frequency_GHz", "Cache_MB", "Max_Memory_GB", "Launch_Year"),
+  Label = c("(a) Theo (*Số lượng nhân*)", "(b) Theo (*Xung nhịp*)", "(c) Theo (*Bộ đệm*) Cache", "(d) Theo RAM (*hỗ trợ*)", "(e) Theo (*Năm ra mắt*)"),
+  X_Label = c("nb_of_Cores", "Turbo_Frequency_GHz (GHz)", "Cache_MB", "Max_Memory_GB", "Launch_Year"),
+  Color = c("forestgreen", "orchid", "cyan4", "salmon", "steelblue"),
+  stringsAsFactors = FALSE
+)
+
+for (i in seq_len(nrow(scatter_info))) {
+  x_var <- scatter_info$Variable[i]
+  keep_idx <- complete.cases(df[, c(x_var, "Price_USD")]) & is.finite(df[[x_var]]) & is.finite(df$Price_USD) & (df$Price_USD > 0)
+  scatter_info$Used_N[i] <- sum(keep_idx)
+  scatter_info$Dropped_N[i] <- nrow(df) - scatter_info$Used_N[i]
+}
+
+make_scatter_plot <- function(data, x_var, title_text, x_label, point_color, log_price = FALSE) {
+  p <- ggplot(data, aes(x = .data[[x_var]], y = Price_USD)) +
+    geom_point(color = point_color, alpha = 0.5, size = 1.5) +
+    labs(title = title_text, x = x_label, y = "Price_USD") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 11, face = "italic"))
+
+  if (log_price) {
+    p <- p + scale_y_log10() + labs(y = "Price_USD (log10 scale)")
+  }
+
+  p
+}
+
+plot_list_log <- vector("list", nrow(scatter_info))
+
+for (i in seq_len(nrow(scatter_info))) {
+  x_var <- scatter_info$Variable[i]
+  keep_idx <- complete.cases(df[, c(x_var, "Price_USD")]) & is.finite(df[[x_var]]) & is.finite(df$Price_USD) & (df$Price_USD > 0)
+  plot_data <- df[keep_idx, , drop = FALSE]
+
+  plot_list_log[[i]] <- make_scatter_plot(
+    data = plot_data,
+    x_var = x_var,
+    title_text = scatter_info$Label[i],
+    x_label = scatter_info$X_Label[i],
+    point_color = scatter_info$Color[i],
+    log_price = TRUE
+  )
+}
+
+combined_scatter_log <- (plot_list_log[[1]] | plot_list_log[[2]]) /
+                        (plot_list_log[[3]] | plot_list_log[[4]]) /
+                        (plot_list_log[[5]] | plot_spacer()) +
+  plot_annotation(
+    title = "(*Đồ thị phân tán (log10 Price\_USD) theo các đặc tính kỹ*)",
+    theme = theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
+  )
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{ScatterPlots_Combined_LogPrice.png}
+    \caption{Đồ thị phân tán của Giá bán (đã biến đổi Log10) theo các đặc tính kỹ thuật vi xử lý.}
+    \label{fig:scatter_combined_log}
+\end{figure}
+
+\subsubsection*{Nhận xét tổng quan qua hình thái phân tán Log10}
+
+Dựa trên hình \ref{fig:scatter_combined_log}, mức độ ảnh hưởng của từng thông số phần cứng đến định giá sản phẩm bộc lộ các đặc trưng sau:
+
+\begin{itemize}
+    \item \textbf{Số lượng nhân (nb\_of\_Cores):} Dưới thang đo logarit, cấu trúc nhân bộc lộ một xu hướng tăng cực kỳ rõ nét và dốc. Số lượng nhân vật lý càng nhiều, phân khúc giá của CPU càng được định vị ở các nấc thang logarit cao hơn.
+
+    \item \textbf{Xung nhịp (Turbo\_Frequency\_GHz):} Mật độ điểm lan tỏa rộng khắp trên mặt phẳng thay vì tụ thành một đường dốc. Tuy vẫn có xu hướng nhích nhẹ lên ở các mức xung nhịp cao ($> 3.5\text{GHz}$), nhưng mức độ phân tán tại mỗi mức xung nhịp là rất lớn. Điều này cho thấy xung nhịp không phải là yếu tố định giá độc lập, mà thường phải đi kèm với kiến trúc nhân và bộ đệm.
+
+     \item \textbf{Bộ đệm (Cache\_MB):} Dữ liệu tập trung thành một dải dọc dày đặc ở mức Cache dưới 50MB. Đáng chú ý, biểu đồ phát hiện một cụm điểm dị biệt có dung lượng Cache xấp xỉ 500MB nhưng mức giá lại cực thấp. Hiện tượng này đòi hỏi sự cẩn trọng khi đưa biến \texttt{Cache\_MB} vào mô hình phân tích để tránh hiện tượng đòn bẩy làm sai lệch phương trình.
+
+    \item \textbf{RAM hỗ trợ tối đa (Max\_Memory\_GB):} Tương tự như số lượng nhân, năng lực quản lý bộ nhớ cũng thể hiện một đường xu hướng tuyến tính dương rất mạnh trên thang log10. Đặc biệt, phân phối này bị phân mảnh thành các cột dọc tương ứng với các giới hạn kiến trúc RAM tiêu chuẩn (ví dụ: 64GB, 128GB, 1TB, 2TB). Các quan sát nằm ở cụm $> 1000\text{GB}$ hầu hết có giá trị rất đắt đỏ, minh chứng cho việc định giá cao của Intel dành cho máy chủ doanh nghiệp.
+
+    \item \textbf{Năm ra mắt (Launch\_Year):} Đồ thị xác nhận chiến lược phân tầng giá của nhà sản xuất mở rộng dần theo thời gian. Mặc dù các năm gần đây xuất hiện nhiều sản phẩm ở mức giá "trần" (trên $\$1,000$), nhưng khung giá sàn (dưới $\$100$) vẫn luôn được duy trì mật độ dày đặc.
+\end{itemize}
+
+\textbf{Kết luận}
+\begin{itemize}
+    \item Qua hình thái phân tán trên thang logarit, ta thấy rõ Số lượng nhân (nb\_of\_Cores) và Dung lượng RAM tối đa (Max\_Memory\_GB) là hai biến số có sức mạnh dự báo cao nhất. Chúng thể hiện mối quan hệ tuyến tính thuận cực kỳ mạnh mẽ với Giá bán. Điều này khẳng định chiến lược định giá của Intel xoay quanh "khả năng mở rộng quy mô" của phần cứng: CPU càng xử lý được nhiều luồng và quản lý được không gian bộ nhớ càng lớn thì sẽ bị xếp vào phân khúc giá càng cao cấp.
+    \item Các biến như Xung nhịp (Turbo\_Frequency\_GHz) và Bộ đệm (Cache\_MB) cho thấy bức tranh phức tạp hơn. Xung nhịp cao không đồng nghĩa với giá đắt (có rất nhiều CPU 4.0GHz - 5.0GHz nhưng giá rẻ), và bộ đệm lớn cũng xuất hiện những điểm dị biệt giá thấp.
+\end{itemize}
+
+\subsection{Ma trận tương quan}
+
+Để xác định các mối quan hệ tuyến tính giữa các biến số, chúng ta tính toán hệ số tương quan Pearson giữa bảy biến số: \texttt{Price\_USD}, \texttt{nb\_of\_Cores}, \texttt{Turbo\_Frequency\_GHz}, \texttt{Launch\_Year}, \texttt{TDP\_W}, \texttt{Cache\_MB}, và \texttt{Max\_Memory\_GB}. 
+
+Ma trận tương quan được trực quan hóa bằng một bản đồ nhiệt (Heatmap) sử dụng gradient màu sắc: màu xanh dương biểu thị tương quan âm, màu trắng biểu thị tương quan gần bằng không, và màu đỏ biểu thị tương quan dương mạnh.
+
+\begin{lstlisting}[style=Rstyle, escapeinside={(*}{*)}]
+numerical_vars <- c(
+  "Price_USD", "nb_of_Cores", "Turbo_Frequency_GHz",
+  "Launch_Year", "TDP_W", "Cache_MB", "Max_Memory_GB"
+)
+
+df_num <- df %>% select(all_of(numerical_vars))
+
+cor_matrix <- cor(df_num, use = "complete.obs", method = "pearson")
+
+png(filename = "Heatmap_Correlation.png", width = 1600, height = 1200, res = 200)
+corrplot(
+  cor_matrix,
+  method = "color",
+  type = "upper",
+  addCoef.col = "black",
+  diag = TRUE,
+  col = colorRampPalette(c("blue", "white", "red"))(200),
+  title = "(*Ma trận Tương quan Pearson - 7 Biến Số*)",
+  mar = c(0, 0, 2, 0),
+  tl.cex = 0.9,
+  cl.cex = 0.8,
+  number.cex = 0.7
+)
+invisible(dev.off())
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{Heatmap_Correlation.png}
+    \caption{Ma trận tương quan Pearson của bảy biến số. Các hệ số tương quan được hiển thị trên từng ô, với độ bão hòa màu thể hiện độ mạnh của tương quan.}
+    \label{fig:heatmap_corr}
+\end{figure}
+
+\subsubsection{Phân tích tương quan tuyến tính và hiện tượng đa cộng tuyến}
+
+Để lượng hóa mức độ và chiều hướng của các mối quan hệ tuyến tính giữa các đặc trưng kỹ thuật và giá thành sản phẩm, nghiên cứu tiến hành xây dựng ma trận tương quan Pearson (Hình \ref{fig:heatmap_corr}). 
+
+\textbf{a. Các động lực kỹ thuật định hình Giá bán (Price\_USD)}\\
+Từ bản đồ nhiệt, chúng ta quan sát được những tương quan dương mạnh giữa biến mục tiêu Price\_USD và các thông số phần cứng cốt lõi, cụ thể theo mức độ giảm dần:
+
+\begin{itemize}
+    \item \textbf{Công suất tỏa nhiệt (TDP\_W) -- $r = 0.70$:} Đây là biến số có sức ảnh hưởng tuyến tính mạnh nhất đến giá bán. Điều này khá bất ngờ nhưng hợp lý: mức tiêu thụ điện năng (TDP) khổng lồ thường là đặc điểm nhận dạng của các dòng chip máy chủ (Server) siêu đắt đỏ. Mức TDP cao đóng vai trò như một biến đại diện (proxy) cho lớp hiệu năng cao cấp nhất.
+    
+    \item \textbf{Khả năng hỗ trợ bộ nhớ (Max\_Memory\_GB) -- $r = 0.69$:} Mức độ tương quan dương lớn xác nhận dung lượng RAM hỗ trợ tối đa là một yếu tố định giá cốt lõi. Khả năng quản lý hàng TB RAM là đặc quyền của vi kiến trúc doanh nghiệp, tỷ lệ thuận trực tiếp với định giá vượt trội của sản phẩm.
+    
+    \item \textbf{Cấu trúc đa nhân (nb\_of\_Cores) -- $r = 0.59$:} Số lượng lõi vật lý có tương quan khá mạnh với giá bán. Khả năng xử lý đa luồng càng cao, năng lực tính toán càng lớn, từ đó giá thành càng được đẩy lên cao.
+    
+    \item \textbf{Đáng chú ý - Bộ nhớ đệm (Cache\_MB) -- $r = 0.09$:} Trái ngược với kỳ vọng ban đầu, dung lượng Cache gần như không có sự tương quan tuyến tính trực tiếp với giá bán trên toàn bộ tập dữ liệu (hệ số tiệm cận 0). 
+\end{itemize}
+
+\textbf{b. Hiện tượng đa cộng tuyến và hệ quả thống kê}\\
+Một phát hiện quan trọng từ ma trận tương quan là sự tồn tại của các hệ số tương quan chéo khá lớn giữa chính các biến độc lập. Điển hình nhất là mối liên hệ khăng khít giữa số lượng lõi (nb\_of\_Cores) và công suất (TDP\_W) với $r = 0.69$.
+
+Dưới góc nhìn kỹ thuật, sự phụ thuộc này là hiển nhiên: việc gia tăng số nhân vật lý trên đế silicon bắt buộc CPU phải tiêu thụ nhiều điện năng hơn và tỏa ra nhiều nhiệt lượng hơn. Tuy nhiên, dưới lăng kính thống kê, hiện tượng này dẫn đến hệ quả Đa cộng tuyến (Multicollinearity). Sự tương quan chéo này sẽ vi phạm giả định của mô hình Hồi quy tuyến tính cổ điển, làm phình to sai số chuẩn và làm giảm độ tin cậy của các hệ số dự báo. 
+
+Khám phá trên đóng vai trò là kim chỉ nam cho phần Thống kê suy diễn. Nghiên cứu sẽ cần áp dụng các kỹ thuật chọn lọc biến (như Stepwise Selection) nhằm triệt tiêu nhiễu loạn từ đa cộng tuyến trước khi xây dựng mô hình điền khuyết giá trị cho biến Price\_USD.
+
+\end{document}
