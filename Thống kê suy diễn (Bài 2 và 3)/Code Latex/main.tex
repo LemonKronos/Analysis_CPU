@@ -1,0 +1,385 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage{amsmath, amssymb}
+\usepackage{geometry}
+\usepackage{tabularx}
+\usepackage[lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage{enumerate}
+\usepackage{color}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{rotating}
+\usepackage{graphicx} % Dùng để chèn ảnh
+\usepackage{float}    % Dùng để ép vị trí ảnh bằng [H]
+\usepackage{xcolor}   % Dùng để tô màu code
+% The package belong to this particular document.
+\usepackage{xcolor}
+\usepackage{listings}
+\definecolor{mGreen}{rgb}{0,0.7,0}
+\definecolor{mGray}{rgb}{0.5,0.5,0.5}
+\definecolor{mPurple}{rgb}{0.5,0,0.35} % Adjusted to a purple shade
+\definecolor{backgroundColour}{rgb}{0.97,0.97,0.97} % Adjusted to a lighter shade
+\usepackage{listings}
+\usepackage{tcolorbox}
+
+% Cấu hình form màu sắc cho Code R chuẩn đẹp
+\lstdefinestyle{RStyle}{
+    backgroundcolor=\color{backgroundColour},   % Set background color
+    commentstyle=\color{mGreen},                 % Comments color
+    keywordstyle=\color{blue},                   % Keywords color
+    numberstyle=\tiny\color{mGray},              % Line numbers style
+    stringstyle=\color{mPurple},                 % Strings color
+    basicstyle=\footnotesize\ttfamily,           % Basic font style
+    breakatwhitespace=false,                     % Break at whitespace
+    breaklines=true,                             % Break long lines
+    captionpos=b,                               % Position of the caption
+    keepspaces=true,                             % Keep spaces
+    numbers=left,                               % Show line numbers
+    numbersep=5pt,                              % Space between numbers and code
+    showspaces=false,                           % Don't show spaces
+    showstringspaces=false,                     % Don't show string spaces
+    showtabs=false,                             % Don't show tabs
+    tabsize=2,                                  % Tab size
+    language=R                                  % Set language to R
+}
+
+\usepackage{float} 
+
+\geometry{a4paper, margin=2cm}
+
+\setlength{\parindent}{1cm}
+\begin{document}
+
+\section{Bài toán 2 mẫu}
+\textbf{Mô tả bài toán:}
+
+Nhiều người cho rằng \textbf{xung nhịp Turbo (Turbo\_Frequency\_GHz)} của các dòng \textbf{CPU} phân khúc \textbf{Desktop} cao hơn so với phân khúc \textbf{Mobile}. Dựa trên dữ liệu, ta cần kiểm định nhận định này với \textbf{mức ý nghĩa 5\% ($\alpha = 0.05$)}.
+
+\textbf{Ký hiệu}
+\begin{itemize}
+    \item $\mu_1$: Xung nhịp Turbo trung bình của \textbf{CPU phân khúc Desktop}
+    \item $\mu_2$: Xung nhịp Turbo trung bình của \textbf{CPU phân khúc Mobile}
+\end{itemize}
+
+\textbf{Giả thuyết kiểm định}
+
+\[
+\begin{cases} 
+H_0 : \mu_1 \le \mu_2 & \text{(Xung nhịp Turbo trung bình của Desktop không lớn hơn Mobile)} \\ 
+H_1 : \mu_1 > \mu_2 & \text{(Xung nhịp Turbo trung bình của Desktop lớn hơn Mobile)} 
+\end{cases}
+\]
+
+\textbf{Tiền xử lý dữ liệu và tính các đặc trưng mẫu}
+\begin{tcolorbox}[colback=gray!10, colframe=gray!10, arc=0pt, boxrule=0pt]
+\begin{verbatim}
+# Lọc bỏ giá trị NA và lấy dữ liệu theo phân khúc
+df <- read.csv("Cleaned_Intel_CPUs.csv")
+df2 <- na.omit(df[, c("Vertical_Segment", "Turbo_Frequency_GHz")])
+desktop_CPU <- subset(df2, Vertical_Segment == "Desktop")$Turbo_Frequency_GHz
+mobile_CPU <- subset(df2, Vertical_Segment == "Mobile")$Turbo_Frequency_GHz
+
+# Đặc trưng mẫu Desktop
+n1 <- length(desktop_CPU)
+x_1 <- mean(desktop_CPU)
+s1 <- sd(desktop_CPU)
+
+# Đặc trưng mẫu Mobile
+n2 <- length(mobile_CPU)
+x_2 <- mean(mobile_CPU)
+s2 <- sd(mobile_CPU)
+
+# Tổng hợp kết quả
+result <- data.frame(
+  Phan_khuc = c("Desktop", "Mobile"),
+  So_luong = c(n1, n2),
+  Trung_binh = c(x_1, x_2),
+  Do_lech_chuan = c(s1, s2)
+)
+View(result)
+\end{verbatim}
+\end{tcolorbox}
+
+\clearpage
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{1.jpg}
+\end{figure}
+
+Để giải bài toán trên, trước hết cần xác định loại kiểm định phù hợp. Trong trường hợp này, ta thực hiện kiểm tra giả định về phân phối chuẩn của dữ liệu mỗi nhóm:
+
+\begin{tcolorbox}[colback=gray!10, colframe=gray!10, arc=0pt, boxrule=0pt]
+\begin{verbatim}
+# Q-Q plot cho phân khúc Desktop
+qqnorm(desktop_CPU, main="Q-Q Plot: Desktop Turbo Frequency")
+qqline(desktop_CPU, col="red")
+
+# Q-Q plot cho phân khúc Mobile
+qqnorm(mobile_CPU, main="Q-Q Plot: Mobile Turbo Frequency")
+qqline(mobile_CPU, col="blue")
+\end{verbatim}
+\end{tcolorbox}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{2.jpg}
+\end{figure}
+Dựa vào đồ thị Q-Q plot, ta thấy các quan trắc ở hai đuôi lệch khá nhiều so với đường thẳng kỳ vọng, cho thấy dữ liệu có thể không tuân theo phân phối chuẩn.
+
+Để khẳng định chắc chắn hơn, ta sử dụng kiểm định Shapiro-Wilk:
+\begin{tcolorbox}[colback=gray!10, colframe=gray!10, arc=0pt, boxrule=0pt]
+\begin{verbatim}
+# Kiểm định Shapiro-Wilk cho Desktop
+shapiro.test(desktop_CPU)
+
+# Kiểm định Shapiro-Wilk cho Mobile
+shapiro.test(mobile_CPU)
+\end{verbatim}
+\end{tcolorbox}
+\clearpage
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{3.jpg}
+\end{figure}
+
+Nhận xét: Do cả hai p-value của hai hãng đều bé hơn mức ý nghĩa 5% (α = 0.05),
+nên cả hai nhóm không tuân theo phân phối chuẩn.
+
+Với bài toán này:\\
+- Đây là kiểm định trung bình 2 mẫu độc lập.  \\
+- Hai tổng thể có phân phối bất kỳ.  \\
+- Cỡ mẫu của cả hai nhóm đều rất lớn (đều lớn hơn 30). \\
+
+\textbf{Tính giá trị kiểm định và xác định miền bác bỏ}
+\begin{tcolorbox}[colback=gray!10, colframe=gray!10, arc=0pt, boxrule=0pt]
+\begin{verbatim}
+# Tính giá trị Z-test thực nghiệm (Z0)
+z0 <- (x_1 - x_2) / sqrt((s1^2/n1) + (s2^2/n2))
+
+# Xác định giá trị tới hạn Z_alpha với alpha = 0.05 (Kiểm định một phía bên phải)
+alpha <- 0.05
+z_alpha <- qnorm(1 - alpha)
+
+# Hiển thị kết quả
+data.frame(Z0 = z0, Z_alpha = z_alpha)
+\end{verbatim}
+\end{tcolorbox}
+
+\textbf{Kết luận kiểm định z-test}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{4.jpg}
+\end{figure}
+
+Điều này có nghĩa là xung nhịp Turbo của Desktop cao hơn Mobile
+
+\clearpage
+\section{Bài Toán 1-Way ANOVA}
+\textbf{Mô tả bài toán:}
+
+Trên thị trường vi xử lý \textbf{CPU} hiện nay, các sản phẩm được chia thành nhiều phân khúc khác nhau như \textbf{Desktop, Mobile, Server và Embedded}. Như ta đã biết, dung lượng bộ nhớ tối đa \textbf{Max Memory} có ảnh hưởng lớn đối với hiệu năng và khả năng xử lý của một hệ thống.\\
+Hãy đánh giá sự ảnh hưởng của phân khúc thị trường \textbf{Vertical Segment} đến dung lượng bộ nhớ tối đa \textbf{Max Memory GB} của CPU Intel, với \textbf{mức ý nghĩa 5\% ($\alpha = 0.05$)}.\\
+
+\textbf{Xây dựng mô hình:}\\
+Trước hết, ta cần phải xem sau khi đọc dữ liệu từ file gốc, số lượng CPU ở mỗi phân khúc là bao nhiêu. Để thực hiện điều này ta sử dụng hàm table() có sẵn trong R.
+
+\begin{tcolorbox}[colback=gray!10, colframe=gray!10, arc=0pt, boxrule=0pt]
+\begin{verbatim}
+# Đọc dữ liệu
+df <- read.csv("Cleaned_Intel_CPUs.csv")
+
+#Lọc NA ở 2 cột dữ liệu sẽ dùng
+df2 <- na.omit(df[, c("Vertical_Segment", "Max_Memory_GB")])
+
+# Xem số lượng quan sát ở mỗi phân khúc
+bang_thong_ke_1 <- table(df2$Vertical_Segment)
+print(bang_thong_ke_1)
+\end{verbatim}
+\end{tcolorbox}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{5.png}
+\end{figure}
+Như ta đã thấy, số liệu sau khi xử lý xuất hiện 4 phân khúc thị trường chính là \textbf{Mobile, Desktop, Sever và Embedded}. Tuy nhiên, do số lượng của phân khúc Embedded quá nhỏ nên ta thực hiện loại bỏ dữ liệu về Embedded, thực hiện phân tích phương sai với những dữ liệu còn lại.
+
+\begin{tcolorbox}[colback=gray!10, colframe=gray!10, arc=0pt, boxrule=0pt]
+\begin{verbatim}
+# Khai báo data_anova (Lọc 3 phân khúc)
+seg3 <- c("Desktop", "Mobile", "Server")
+data_anova <- df2[df2$Vertical_Segment %in% seg3, c("Vertical_Segment", "Max_Memory_GB")]
+bang_thong_ke_2 <- table(data_anova$Vertical_Segment)
+print(bang_thong_ke_2)
+\end{verbatim}
+\end{tcolorbox}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{6.png}
+\end{figure}
+Sau khi đã thực hiện lọc dữ liệu lần cuối, chỉ còn lại các quan sát về 3 phân khúc có số lượng lớn.\\
+Ta quy định:\\
+1. Desktop\\
+2. Mobile\\
+3. Server\\
+\\Từ bài toán ta có được cặp giả thuyết không và giả thuyết đối:\\
+* $H_0$: $µ_1 = µ_2 = µ_3$ (Dung lượng bộ nhớ tối đa trung bình ở các phân khúc là bằng nhau)\\
+* $H_1$: $\exists µ_i \ne µ_j$ (Tồn tại ít nhất 2 phân khúc có dung lượng bộ nhớ tối đa trung bình khác nhau)\\
+\textbf{Kiểm tra giả định}\\
+Để có thể áp dụng mô hình ANOVA, ta trước hết cần phải kiểm tra các giả định ban đầu:\\
+- Các quan sát được lấy mẫu là độc lập nhau.\\
+- Các tổng thể này có phân phối chuẩn.\\
+- Các phương sai của tổng thể là bằng nhau.\\
+
+Ta đã lấy được các mẫu độc lập với nhau. Do đó chỉ cần kiểm tra các giả định còn lại.
+\textbf{Dung lượng bộ nhớ tối đa của các phân khúc có phân phối chuẩn}\\
+Ta thực hiện kiểm tra trực quan bằng đồ thị Normal Q-Q
+
+\begin{tcolorbox}[colback=gray!10, colframe=gray!10, arc=0pt, boxrule=0pt]
+\begin{verbatim}
+# 1. Q-Q Plot cho "Desktop"
+qqnorm(data_anova$Max_Memory_GB[data_anova$Vertical_Segment == "Desktop"], 
+       main = "Q-Q Plot for Desktop")
+qqline(data_anova$Max_Memory_GB[data_anova$Vertical_Segment == "Desktop"], col = "red")
+\end{verbatim}
+\end{tcolorbox}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.1\textwidth]{7.png}
+\end{figure}
+Dựa trên đồ thị Q-Q Plot, sự phân bố của các điểm quan trắc không tạo thành một đường thẳng dọc theo đường kỳ vọng (màu đỏ). Đặc biệt, sự sai lệch lớn ở phần đuôi cho thấy dữ liệu có độ lệch (skewness) đáng kể và chứa giá trị ngoại lai. Do đó, giả định về phân phối chuẩn có thể bị vi phạm. Ta tiến hành kiểm định Shapiro-Wilk để xác nhận.
+\begin{tcolorbox}[colback=gray!10, colframe=gray!10, arc=0pt, boxrule=0pt]
+\begin{verbatim}
+# Chạy kiểm định Shapiro-Wilk cho "Desktop"
+shapiro.test(data_anova$Max_Memory_GB[data_anova$Vertical_Segment == "Desktop"])
+print(shapiro.test(data_anova$Max_Memory_GB[data_anova$Vertical_Segment == "Desktop"]))
+\end{verbatim}
+\end{tcolorbox}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{8.png}
+\end{figure}
+Giá trị P do lệnh shapiro.test() đưa ra bé hơn mức ý nghĩa ban đầu, do đó, bộ nhớ tối đa của Desktop không có phân phối chuẩn.
+\textbf{Kết luận}: Bộ nhớ tối đa của Desktop không có phân phối chuẩn.
+\begin{tcolorbox}[colback=gray!10, colframe=gray!10, arc=0pt, boxrule=0pt]
+\begin{verbatim}
+# 2. Q-Q Plot cho "Mobile"
+qqnorm(data_anova$Max_Memory_GB[data_anova$Vertical_Segment == "Mobile"], 
+       main = "Q-Q Plot for Mobile")
+qqline(data_anova$Max_Memory_GB[data_anova$Vertical_Segment == "Mobile"], col = "red")
+\end{verbatim}
+\end{tcolorbox}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.1\textwidth]{9.png}
+\end{figure}
+Tương tự như Desktop, dựa vào đồ thị Q-Q Plot, ta thấy các điểm dữ liệu của Mobile cũng có xu hướng lệch ra khỏi đường thẳng chuẩn, phần đuôi dữ liệu không có dấu hiệu bám theo đường phân phối chuẩn. Ta sẽ kiểm tra lại bằng kiểm định Shapiro-Wilk.
+\begin{tcolorbox}[colback=gray!10, colframe=gray!10, arc=0pt, boxrule=0pt]
+\begin{verbatim}
+# Chạy kiểm định Shapiro-Wilk cho "Mobile"
+shapiro.test(data_anova$Max_Memory_GB[data_anova$Vertical_Segment == "Mobile"])
+print(shapiro.test(data_anova$Max_Memory_GB[data_anova$Vertical_Segment == "Mobile"]))
+\end{verbatim}
+\end{tcolorbox}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{10.png}
+\end{figure}
+Giá trị P do lệnh shapiro.test() trả về là rất bé, nhỏ hơn mức ý nghĩa $\alpha = 0.05$. Do đó, ta bác bỏ giả thuyết $H_0$.
+\textbf{Kết luận}: Bộ nhớ tối đa của Mobile không có phân phối chuẩn.
+\begin{tcolorbox}[colback=gray!10, colframe=gray!10, arc=0pt, boxrule=0pt]
+\begin{verbatim}
+# 3. Q-Q Plot cho "Server"
+qqnorm(data_anova$Max_Memory_GB[data_anova$Vertical_Segment == "Server"], 
+       main = "Q-Q Plot for Server")
+qqline(data_anova$Max_Memory_GB[data_anova$Vertical_Segment == "Server"], col = "red")
+\end{verbatim}
+\end{tcolorbox}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.1\textwidth]{11.png}
+\end{figure}
+Quan sát đồ thị Q-Q Plot của Server, ta cũng thấy một sự sai lệch rất lớn so với đường màu đỏ. Ta tiếp tục chạy kiểm định để có kết luận chính xác.
+\begin{tcolorbox}[colback=gray!10, colframe=gray!10, arc=0pt, boxrule=0pt]
+\begin{verbatim}
+# Chạy kiểm định Shapiro-Wilk cho "Server"
+shapiro.test(data_anova$Max_Memory_GB[data_anova$Vertical_Segment == "Server"])
+print(shapiro.test(data_anova$Max_Memory_GB[data_anova$Vertical_Segment == "Server"]))
+\end{verbatim}
+\end{tcolorbox}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{12.png}
+\end{figure}
+Giá trị P do lệnh shapiro.test() trả về tiếp tục bé hơn mức ý nghĩa 5% ($\alpha = 0.05$).
+Do đó, ta bác bỏ giả thuyết $H_0$.
+\textbf{Kết luận}: Bộ nhớ tối đa của Server cũng không có phân phối chuẩn.
+\textbf{Phương sai dung lượng bộ nhớ tối đa của các phân khúc là bằng nhau}
+Ta sử dụng kiểm định levene (thuộc thư viện car) trong R để thực hiện việc kiểm tra phương sai của bộ nhớ tối đa ở các phân khúc.\\
+Ta đặt cặp giả thuyết:\\
+* $H_0$: $\sigma_1^2 = \sigma_2^2 = \sigma_3^2$ (Phương sai của dung lượng bộ nhớ giữa các phân khúc là bằng nhau)\\
+
+* $H_1$: $\exists \sigma_i^2 \neq \sigma_j^2$ (Có ít nhất 2 phân khúc có phương sai dung lượng bộ nhớ là khác nhau)\\
+\begin{tcolorbox}[colback=gray!10, colframe=gray!10, arc=0pt, boxrule=0pt]
+\begin{verbatim}
+library(car)
+leveneTest(Max_Memory_GB ~ Vertical_Segment, data = data_anova)
+\end{verbatim}
+\end{tcolorbox}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{13.png}
+\end{figure}
+Dựa vào kết quả in ra, ta thấy giá trị của p-value (khoảng $2.2 \times 10^{-16}$) nhỏ hơn rất nhiều so với mức ý nghĩa $\alpha = 0.05$, nên ta có đủ cơ sở để bác bỏ giả thuyết $H_0$. \\
+Vậy ta kết luận có \textbf{ít nhất 2 phân khúc có phương sai của bộ nhớ tối đa là khác nhau}. \\
+
+\textbf{Xây dựng mô hình ANOVA}
+Lưu ý: Có thể thấy 2 trên 3 giả định phục vụ cho phân tích ANOVA đã không được thỏa mãn. Do đó việc phân tích ANOVA dưới đây chỉ mang tính chất tham khảo, không đáp ứng được nhu cầu đánh giá trong thực tế. Để tiếp tục phân tích ANOVA, ta cho rằng dữ liệu đều đáp ứng giả định ban đầu.\\
+Tiếp theo, ta xây dựng mô hình ANOVA bằng hàm aov() có sẵn trong R.\\
+\begin{tcolorbox}[colback=gray!10, colframe=gray!10, arc=0pt, boxrule=0pt]
+\begin{verbatim}
+model_aov <- aov(Max_Memory_GB ~ Vertical_Segment, data = data_anova)
+summary(model_aov)
+\end{verbatim}
+\end{tcolorbox}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{14.png}
+\end{figure}
+Từ kết quả này, ta vẽ lại một bảng mới cho trực quan hơn.\\
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{15.png}
+\end{figure}
+\clearpage
+Có thể thấy trên kết quả này, phần mềm cho ta một giá trị P-value rất bé (gần như bằng 0). Giá trị này giúp ta quyết định giả thuyết theo nguyên tắc xác suất. Có nghĩa là ta sẽ sử dụng giá trị P này để so sánh với mức ý nghĩa $\alpha = 0.05$ ban đầu.\\
+Do $P < 0.05$, ta có đủ điều kiện để bác bỏ giả thuyết $H_0$. Vậy dung lượng bộ nhớ tối đa trung bình của một CPU có bị ảnh hưởng bởi phân khúc của nó (Desktop/Mobile/Server).\\
+\textbf{Phân tích mở rộng}\\
+Sau khi phân tích ANOVA, ta biết được rằng đã có sự khác biệt về trung bình dung lượng bộ nhớ tối đa giữa các phân khúc. Để làm rõ sự khác nhau này, ta sử dụng thêm câu lệnh TukeyHSD() để thực hiện phân tích sâ
+Lưu ý: Do ban đầu dữ liệu đã không thỏa mãn các giả định của phân tích ANOVA, kết quả phân tích sâu dưới đây cũng chỉ mang tính chất tham khảo, không có giá trị đánh giá thực tế.\\
+Ta đặt cặp giả thuyết:\\
+* $H_0$: $\mu_i = \mu_j$ (Trung bình bộ nhớ tối đa giữa 2 phân khúc $i, j$ là bằng nhau)\\
+* $H_1$: $\mu_i \neq \mu_j$ (Trung bình bộ nhớ tối đa giữa 2 phân khúc $i, j$ là khác nhau)\\
+\begin{tcolorbox}[colback=gray!10, colframe=gray!10, arc=0pt, boxrule=0pt]
+\begin{verbatim}
+tukey_results <- TukeyHSD(model_aov)
+print(tukey_results)
+plot(tukey_results)
+\end{verbatim}
+\end{tcolorbox}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{16.png}
+\end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{17.png}
+\end{figure}
+\clearpage
+Dựa vào kết quả và biểu đồ, ta có thể thấy:\\
+* Desktop - Mobile: Giá trị $P_{adj} = 0.8906 > \alpha$ và đường kẻ của khoảng tin cậy cắt qua vạch 0. Do đó ta vẫn chưa đủ cơ sở để bác bỏ $H_0$, không có sự khác biệt ý nghĩa về dung lượng bộ nhớ tối đa trung bình giữa dòng Desktop và Mobile.\\
+* Server - Desktop: Giá trị $P_{adj} < \alpha$ (xấp xỉ 0) và đường kẻ của khoảng tin cậy nằm hoàn toàn bên phải vạch 0. Do đó có thể kết luận rằng $H_0$ bị bác bỏ, dung lượng bộ nhớ tối đa trung bình của dòng Server cao hơn đáng kể so với Desktop.\\
+* Server - Mobile: Giá trị $P_{adj} < \alpha$ (xấp xỉ 0) và đường kẻ khoảng tin cậy nằm hoàn toàn bên phải vạch 0. Do đó có thể kết luận rằng $H_0$ bị bác bỏ, dung lượng bộ nhớ tối đa trung bình của dòng Server cao hơn Mobile.\\
+Từ kết quả của phân tích sâu, ta kết luận được rằng trung bình bộ nhớ tối đa của dòng Server là lớn nhất và có sự vượt trội hoàn toàn so với cả hai dòng Desktop và Mobile.\\
+\end{document}
