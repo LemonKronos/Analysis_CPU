@@ -1,11 +1,11 @@
-### --- Xử lý lại dư liệu --- ###
+### --- Preprocessed data --- ###
 
 # read
 data <- read.csv("Cleaned_Intel_CPUs.csv", header = TRUE)
 cat("Rows original      :", nrow(data), "\n")
 
 
-# drop NA in price and Max_Memory_GB 
+# drop NA in price and Max_Memory_GB
 data <- data[!is.na(data$Price_USD), ]
 data <- data[!is.na(data$Max_Memory_GB), ]
 cat("After drop price NA:", nrow(data), "\n")
@@ -14,7 +14,7 @@ cat("After drop price NA:", nrow(data), "\n")
 write.csv(data, "Inferential Statistics/data_clean.csv", row.names = FALSE)
 cat("Saved → Inferential Statistics/data_clean.csv\n")
 
-### --- Chia tập dữ liệu --- ###
+### --- Derive data --- ###
 
 set.seed(123)
 n <- nrow(data)
@@ -31,12 +31,12 @@ cat(
   nrow(test_data), "\n"
 )
 
-# Tao mo hinh
+# Create model
 model <- lm(Price_USD ~ nb_of_Cores + Turbo_Frequency_GHz + TDP_W + Cache_MB + Max_Memory_GB, data = train_data)
 print(summary(model))
 
 
-# Kiem tra mô hình bằng test_data
+# Check model by test_data
 predicted <- predict(model, newdata = test_data)
 test_data$Predicted_Price_USD <- predicted
 print(head(test_data[, c("Price_USD", "Predicted_Price_USD")], 5))
@@ -58,7 +58,7 @@ qqnorm(train_data$residuals,
 qqline(train_data$residuals, col = "red", lwd = 2)
 dev.off()
 
-# Kiểm tra tính độc lập của sai số
+# Check the independent of residuals
 library(lmtest)
 dw_test <- dwtest(model)
 print(dw_test)
@@ -77,7 +77,7 @@ lines(lowess(model$fitted.values, residuals(model)), col = "orange", lwd = 2)
 dev.off()
 
 
-# Đánh giá mô hình bằng test_data
+# Evaluate model by test_data
 library(Metrics)
 rmse_value <- rmse(test_data$Price_USD, test_data$Predicted_Price_USD)
 r2_value <- cor(test_data$Price_USD, test_data$Predicted_Price_USD)^2
@@ -87,7 +87,7 @@ cat("-> RMSE:", round(rmse_value, 4), "\n")
 print(head(test_data, 5))
 
 
-# Chuan hóa lại bằng log_transform
+# Nomarlize by log_transform
 train_data_log <- train_data
 test_data_log <- test_data
 num_vars <- c("Price_USD", "nb_of_Cores", "Turbo_Frequency_GHz", "TDP_W", "Cache_MB", "Max_Memory_GB")
@@ -102,7 +102,7 @@ model2 <- lm(Price_USD ~ nb_of_Cores + Turbo_Frequency_GHz + TDP_W + Cache_MB + 
 cat("\n####################\nMô hình thứ hai\n####################\n")
 print(summary(model2))
 
-# Kiem tra mô hình bằng test_data
+# Check model by test data
 predicted_log <- predict(model2, newdata = test_data_log)
 test_data_log$Predicted_Price_USD <- predicted_log
 print(head(test_data_log[, c("Price_USD", "Predicted_Price_USD")], 5))
@@ -112,3 +112,35 @@ rmse_value_log <- rmse(test_data_log$Price_USD, test_data_log$Predicted_Price_US
 cat("ĐÁNH GIÁ MÔ HÌNH GỐC TRÊN TEST_DATA_LOG:\n")
 cat("-> RMSE:", round(rmse_value_log, 4), "\n")
 print(head(test_data_log, 5))
+
+
+data_wna <- read.csv("Cleaned_Intel_CPUs.csv", header = TRUE)
+
+# Preplace col Max_Memory_GB by mean of its value depent on Vertical_Segment
+mean_4_segments <- tapply(as.numeric(data_wna$Max_Memory_GB),
+  data_wna$Vertical_Segment,
+  FUN = function(x) mean(x, na.rm = TRUE)
+)
+na_rows <- is.na(data_wna$Max_Memory_GB)
+segment_of_na <- data_wna$Vertical_Segment[na_rows]
+data_wna$Max_Memory_GB[na_rows] <- mean_4_segments[segment_of_na]
+
+data_wna <- data_wna[is.na(data_wna$Price_USD), ]
+
+data_wna_log <- data_wna
+predictors <- c("nb_of_Cores", "Turbo_Frequency_GHz", "TDP_W", "Cache_MB", "Max_Memory_GB")
+
+for (var in predictors) {
+  data_wna_log[[var]] <- log(as.numeric(data_wna_log[[var]]))
+}
+
+log_price_preds <- predict(model2, newdata = data_wna_log)
+
+# Use adjustment by Duan's Smearing (when residual isnot nomarlize)
+cf <- mean(exp(residuals(model2)))
+price_pred_smearing <- exp(log_price_preds) * cf
+
+
+data_wna$Predicted_Price_USD <- price_pred_smearing
+
+write.csv(data_wna, "Inferential Statistics/data_price_predicted.csv", row.names = FALSE)
