@@ -4,7 +4,7 @@ library(stringr)
 library(ggplot2)
 library(tidyr)
 
-df <- read.csv("Intel_CPUs.csv", stringsAsFactors = FALSE)
+df <- read.csv("data/Intel_CPUs.csv", stringsAsFactors = FALSE)
 
 # Helper function to dynamically print missing values with percentages
 print_missing <- function(df_data, state_name) {
@@ -103,7 +103,7 @@ df_final <- df_filtered |>
 print_missing(df_final, "df_final")
 
 # Write to file
-write.csv(df_final, "Cleaned_Intel_CPUs.csv", row.names = FALSE)
+write.csv(df_final, "data/Cleaned_Intel_CPUs.csv", row.names = FALSE)
 
 
 # -----------------------------------------------------
@@ -142,6 +142,6 @@ pca_plot <- ggplot(pca_plot_data, aes(x = PC1, y = PC2, color = Segment)) +
 
 # Show in console and save as a high-res image
 print(pca_plot)
-ggsave("Intel_CPU_PCA_Map.png", pca_plot, width = 8, height = 6, dpi = 300)
+ggsave("data/figure/Intel_CPU_PCA_Map.png", pca_plot, width = 8, height = 6, dpi = 300)
 print("PCA Plot saved as 'Intel_CPU_PCA_Map.png'!")
 # nolint end: line_length_linter.
