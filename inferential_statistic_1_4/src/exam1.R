@@ -19,7 +19,7 @@ print(sw)
 # --- Method 2: Q-Q plot ---
 par(mfrow = c(1, 2))
 
-png("inferential_statistic/figure/TDP_W_normality.png", width = 14, height = 6, units = "in", res = 150)
+png("inferential_statistic_1_4/figure/TDP_W_normality.png", width = 14, height = 6, units = "in", res = 150)
 par(
     mfrow = c(1, 2),
     mar = c(5, 5, 4, 2), # margins

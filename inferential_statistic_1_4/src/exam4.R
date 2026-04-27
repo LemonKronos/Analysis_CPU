@@ -11,8 +11,8 @@ data <- data[!is.na(data$Max_Memory_GB), ]
 cat("After drop price NA:", nrow(data), "\n")
 
 # export
-write.csv(data, "inferential_statistic/data/data_clean.csv", row.names = FALSE)
-cat("Saved → inferential_statistic/data/data_clean.csv\n")
+write.csv(data, "inferential_statistic_1_4/data/data_clean.csv", row.names = FALSE)
+cat("Saved → inferential_statistic_1_4/data/data_clean.csv\n")
 
 ### --- Derive data --- ###
 
@@ -47,7 +47,7 @@ shapiro_test <- shapiro.test(train_data$residuals)
 print(shapiro_test)
 
 # Q-Q plot
-png("inferential_statistic/figure/Q-Q-Residuals.png", width = 14, height = 6, units = "in", res = 150)
+png("inferential_statistic_1_4/figure/Q-Q-Residuals.png", width = 14, height = 6, units = "in", res = 150)
 qqnorm(train_data$residuals,
   main = "Normal Q-Q Plot of Residuals",
   xlab = "Theoretical Quantiles",
@@ -65,7 +65,7 @@ print(dw_test)
 
 
 # Residuals vs Fitted
-png("inferential_statistic/figure/Residuals vs Fitted.png", width = 14, height = 6, units = "in", res = 150)
+png("inferential_statistic_1_4/figure/Residuals vs Fitted.png", width = 14, height = 6, units = "in", res = 150)
 plot(model$fitted.values, residuals(model),
   xlab = "Fitted Values",
   ylab = "Residuals",
@@ -143,4 +143,4 @@ price_pred_smearing <- exp(log_price_preds) * cf
 
 data_wna$Predicted_Price_USD <- price_pred_smearing
 
-write.csv(data_wna, "inferential_statistic/data/data_price_predicted.csv", row.names = FALSE)
+write.csv(data_wna, "inferential_statistic_1_4/data/data_price_predicted.csv", row.names = FALSE)
