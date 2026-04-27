@@ -13,14 +13,14 @@ price_var <- var(df$Price_USD, na.rm = TRUE)
 cat("Price - Mean:", price_mean, "| Variance:", price_var, "\n")
 
 # Gán biểu đồ vào biến p_hist_price
-p_hist_price <- ggplot(df %>% filter(!is.na(Price_USD)), aes(x = Price_USD)) 
-+ geom_histogram(fill = "steelblue", color = "black", bins = 30, alpha = 0.8) 
-+ geom_vline(xintercept = price_mean, color = "red", linetype = "dashed", size = 1.2) 
-+ theme_minimal() 
-+ labs(title = "Distribution of CPU Prices (Price_USD)",
-       subtitle = "Red dashed line represents the Mean",
-       x = "Price (USD)", 
-       y = "Frequency")
+p_hist_price <- ggplot(df %>% filter(!is.na(Price_USD)), aes(x = Price_USD)) +
+       geom_histogram(fill = "steelblue", color = "black", bins = 30, alpha = 0.8) +
+       geom_vline(xintercept = price_mean, color = "red", linetype = "dashed", size = 1.2) + 
+       theme_minimal() + 
+       labs(title = "Distribution of CPU Prices (Price_USD)",
+              subtitle = "Red dashed line represents the Mean",
+              x = "Price (USD)",
+              y = "Frequency")
 
 # Lưu biểu đồ 1A
 ggsave(filename = "descriptive_statistic/figure/Histogram_Price.png", plot = p_hist_price, width = 8, height = 5, dpi = 300)

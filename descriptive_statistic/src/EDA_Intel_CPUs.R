@@ -7,7 +7,7 @@ suppressPackageStartupMessages({
 })
 
 # Đọc dữ liệu đã được làm sạch từ file CSV
-df <- read.csv("Cleaned_Intel_CPUs.csv", stringsAsFactors = FALSE)
+df <- read.csv("data/Cleaned_Intel_CPUs.csv", stringsAsFactors = FALSE)
 
 # ====================================================================
 # 2. THỐNG KÊ TÓM TẮT CÁC BIẾN CÒN LẠI
@@ -109,8 +109,8 @@ combined_scatter_log <- (plot_list_log[[1]] | plot_list_log[[2]]) /
   )
 
 # Lưu biểu đồ ra file
-ggsave("ScatterPlots_Combined.png", plot = combined_scatter, width = 10, height = 12, dpi = 300)
-ggsave("ScatterPlots_Combined_LogPrice.png", plot = combined_scatter_log, width = 10, height = 12, dpi = 300)
+ggsave("descriptive_statistic/figure/ScatterPlots_Combined.png", plot = combined_scatter, width = 10, height = 12, dpi = 300)
+ggsave("descriptive_statistic/figure/ScatterPlots_Combined_LogPrice.png", plot = combined_scatter_log, width = 10, height = 12, dpi = 300)
 
 # ====================================================================
 # 2.3. MA TRẬN TƯƠNG QUAN PEARSON + HEATMAP
@@ -127,7 +127,7 @@ df_num <- df %>% select(all_of(numerical_vars))
 cor_matrix <- cor(df_num, use = "complete.obs", method = "pearson")
 
 # Lưu heatmap tương quan ra file PNG
-png(filename = "Heatmap_Correlation.png", width = 1600, height = 1200, res = 200)
+png(filename = "descriptive_statistic/figure/Heatmap_Correlation.png", width = 1600, height = 1200, res = 200)
 corrplot(
   cor_matrix,
   method = "color",
